@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import COLORS from './data/colors.json';
@@ -8,10 +8,39 @@ const Cat = () => {
   const history = useHistory();
   const [colorIdx, setColorIdx] = useState(0);
   const [delayChange, setDelayChange] = useState(5000);
-  const [statusChange, setStatusChange] = useState('418');
+  const [statusChange, setStatusChange] = useState(
+    localStorage.getItem('catStatus') || '418'
+  );
   const [delay, setDelay] = useState('');
   const [status, setStatus] = useState('');
 
+  useEffect(() => {
+    const intervalID = setInterval(() => {
+      setColorIdx(colorIdx === COLORS.length - 1 ? 0 : colorIdx + 1)
+    }, delayChange)
+
+    return () => {
+      clearInterval(intervalID)
+    }
+  })
+
+  useEffect(() => {
+    localStorage.setItem('catStatus', statusChange);
+  }, [statusChange]);
+
+  useEffect(() => {
+    if (statusChange === '') {
+      alert('Please Enter A Code');
+      setStatusChange('404');
+      return;
+    }
+    if (!VALID_STATUS_CODES.includes(Number(statusChange))) {
+      alert(
+        `Code ${statusChange} might exist, but it is not a proper Cat Status code.`
+      );
+      setStatusChange('404');
+    }
+  }, [statusChange]);
 
   const handleDelaySubmit = (e) => {
     e.preventDefault();
